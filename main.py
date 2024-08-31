@@ -1,7 +1,5 @@
 import sys
-sys.path.append('./Vision/BaseSDK_python_wrapper')
 sys.path.append('./IMU')
-from Vision.FrameSaver_DCAM710 import record_video
 from IMU.bmi160 import bmi160
 from Audio.mic import receive_audio
 import datetime
