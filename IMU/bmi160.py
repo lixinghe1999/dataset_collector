@@ -73,7 +73,7 @@ def bmi160(dataset_folder, sample_rate=1600, t=5, port=1):
     sensor.set_accel_rate(map_rate_acc[sample_rate])
     i = 0
     time_start = time.time()
-    writer = open(dataset_folder + f'/{str(time_start)}_gyro_{str(port)}.txt', 'w')
+    writer = open(dataset_folder + f'/{str(time_start)}_{str(port)}.txt', 'w')
     imu = ''
     t_start = time.time()
     # sensor.setIntDataReadyEnabled(True)

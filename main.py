@@ -1,7 +1,3 @@
-import sys
-sys.path.append('./IMU')
-from IMU.bmi160 import bmi160
-from Audio.mic import receive_audio
 import datetime
 import os
 import argparse
@@ -26,7 +22,7 @@ def create_connection():
 def remote_main(client, args):
     command = '~/miniforge3/envs/hmw/bin/python main.py --imu {} --camera {} --audio {} --time {} --duration {}'\
                     .format(args.imu, args.camera, args.audio, args.time, args.duration)
-    stdin, stdout, stderr = client.exec_command('cd ~/localization/dataset; ' + command)
+    stdin, stdout, stderr = client.exec_command('cd ~/dataset_collector/; ' + command)
     # Wait for the command to complete
     exit_status = stdout.channel.recv_exit_status()
     # Check the exit status
@@ -46,20 +42,21 @@ if __name__ == "__main__":
     parser.add_argument("-d", "--duration", type=int, default=5)
     parser.add_argument("--remote", action='store_true')
     args = parser.parse_args()
-
-    if args.time is not None:
-        pre_date = args.time.split('_')[0]
-        post_date = args.time.split('_')[1]
-    else:
-        pre_date = datetime.datetime.now().strftime("%Y-%m-%d")
-        post_date = datetime.datetime.now().strftime("%H-%M-%S")
-
+    
+    if args.time == None:
+        args.time = datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
+    pre_date = args.time.split('_')[0]
+    post_date = args.time.split('_')[1]
     if args.remote:
         import paramiko
         # collect data remotely
         client = create_connection()
         remote_main(client, args)
     else:
+        import sys
+        sys.path.append('./IMU')
+        from IMU.bmi160 import bmi160
+        from Audio.mic import receive_audio
         dataset_folder = os.path.join('dataset', pre_date, post_date)
         os.makedirs(dataset_folder, exist_ok=True)
         process_list = []

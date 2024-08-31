@@ -57,7 +57,7 @@ if __name__ == '__main__':
             log, audio, fs = prepare(log)
             # subprocess.run('python ssh_control.py --time {}'.format(current_time), shell=True)
             # use multiprocessing to run the command on client and run main function
-            p1 = multiprocessing.Process(target=subprocess.run, args=('python ssh_control.py --time {}'.format(current_time),))
+            p1 = multiprocessing.Process(target=subprocess.run, args=('python main.py --time {} --remote'.format(current_time),))
             p2 = multiprocessing.Process(target=play, args=(audio, fs))
             p1.start()
             p2.start()
