@@ -1,22 +1,8 @@
-import paramiko
+'''
+
+'''
 
 
-def create_connection():
-    # SSH connection details
-    hostname = "192.168.137.172"
-    username = "pi"
-    password = "123456"
-
-    # Create an SSH client
-    client = paramiko.SSHClient()
-
-    # Automatically add the host key (not recommended for production)
-    client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-
-    # Connect to the SSH server
-    client.connect(hostname=hostname, username=username, password=password)
-    
-    return client
 if __name__ == '__main__':
     import argparse
     import datetime

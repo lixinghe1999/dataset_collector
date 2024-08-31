@@ -6,7 +6,7 @@ import librosa
 import sounddevice as sd
 import numpy as np
 import datetime
-from audio_sample import audio_sample, get_chirp, selected_audio_sample
+from Audio.audio_sample import audio_sample, get_chirp, selected_audio_sample
 import time
 
 def prepare(log):
