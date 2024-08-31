@@ -1,0 +1,10 @@
+{
+    "mono": false,
+    "left_type": "car",
+    "right_type": "dog",
+    "left_degree": 135,
+    "right_degree": 45 ,
+    "left_distance": 1,
+    "right_distance": 1,
+    "self_label": [""]
+}
