@@ -72,7 +72,8 @@ def bmi160(dataset_folder, sample_rate=1600, t=5, port=1):
     sensor.set_gyro_rate(map_rate_gyro[sample_rate])
     sensor.set_accel_rate(map_rate_acc[sample_rate])
     i = 0
-    writer = open(dataset_folder + f'/bmi160_{str(port)}.txt', 'w')
+    time_start = time.time()
+    writer = open(dataset_folder + f'/{str(time_start)}_gyro_{str(port)}.txt', 'w')
     imu = ''
     t_start = time.time()
     # sensor.setIntDataReadyEnabled(True)
@@ -109,7 +110,7 @@ if __name__ == "__main__":
     parser.add_argument("-d", "--duration", type=int, default=3)
     parser.add_argument("-f", "--folder", type=str, default='.')
     args = parser.parse_args()
-    sr = bmi160(args.folder, 400, args.duration, 1)
-    vis('bmi160_1.txt')
-    #sr1 = bmi160_accsave('.', 400, 3, port=1)
-    # sr2 = bmi160_gyrosave('.', 400, 3, port=1)
+    sr = bmi160(args.folder, 200, args.duration, 1)
+    sr = bmi160(args.folder, 200, args.duration, 0)
+    # vis('bmi160_1.txt')
+

@@ -1,11 +1,13 @@
+import sys
+sys.path.append('./Vision/BaseSDK_python_wrapper')
+sys.path.append('./IMU')
 from Vision.FrameSaver_DCAM710 import record_video
-from IMU.bmi160 import bmi160, bmi160_accsave, bmi160_gyrosave
+from IMU.bmi160 import bmi160
 from Audio.mic import receive_audio
 import datetime
 import os
 import argparse
 import multiprocessing as mp
-import paramiko
 def create_connection():
     # SSH connection details
     hostname = "192.168.137.172"
@@ -44,7 +46,7 @@ if __name__ == "__main__":
     parser.add_argument("--audio", type=int, default=0) # 0: no audio, 1: Binaural
     parser.add_argument("--time", type=str, default=None)
     parser.add_argument("-d", "--duration", type=int, default=5)
-    parser.add_argument("--remote", type=bool, default=False, action='store_true')
+    parser.add_argument("--remote", action='store_true')
     args = parser.parse_args()
 
     if args.time is not None:
@@ -55,11 +57,12 @@ if __name__ == "__main__":
         post_date = datetime.datetime.now().strftime("%H-%M-%S")
 
     if args.remote:
+        import paramiko
         # collect data remotely
         client = create_connection()
         remote_main(client, args)
     else:
-        dataset_folder = os.path.join(pre_date, post_date)
+        dataset_folder = os.path.join('dataset', pre_date, post_date)
         os.makedirs(dataset_folder, exist_ok=True)
         process_list = []
         if args.imu != 0:
@@ -69,9 +72,6 @@ if __name__ == "__main__":
             if args.imu == 2 or args.imu == 3:
                 p2 = mp.Process(target=bmi160, args=(dataset_folder, 200, args.duration, 1))
                 process_list.append(p2)
-        if args.camera == 1:
-            p3 = mp.Process(target=record_video, args=(dataset_folder, 30, args.duration))
-            process_list.append(p3)
         if args.audio == 1:
             p4 = mp.Process(target=receive_audio, args=(dataset_folder, 48000, args.duration, 2))
             process_list.append(p4)

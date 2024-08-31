@@ -2,7 +2,7 @@ from pickle import FALSE, TRUE
 import sys
 sys.path.append('./BaseSDK_python_wrapper')
 
-from BaseSDK_python_wrapper.DCAM710.API.Vzense_api_710 import *
+from .BaseSDK_python_wrapper.DCAM710.API.Vzense_api_710 import *
 import cv2
 import time
 import copy

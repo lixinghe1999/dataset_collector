@@ -30,4 +30,4 @@ def receive_audio(dataset_folder, fs=48000, duration=5, channels=2):
     waveFile.close()
 
 if __name__ == "__main__":
-    receive_audio()
+    receive_audio('.')
