@@ -1,0 +1,4 @@
+ntplib
+datetime
+sounddevice
+wave
