@@ -4,6 +4,7 @@ import os
 import argparse
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
+    parser.add_argument('--device', type=str, default="YDM8MIC Audio")
     parser.add_argument('--duration', type=int, default=1)
     parser.add_argument('--sample_rate', type=int, default=48000)
     parser.add_argument('--channels', type=int, default=2)
@@ -14,4 +15,4 @@ if __name__ == '__main__':
     dataset_folder = os.path.join('recording', date_str)
     os.makedirs(dataset_folder, exist_ok=True)
     
-    receive_audio(dataset_folder, fs=args.sample_rate, duration=args.duration, channels=args.channels)
+    receive_audio(dataset_folder, device=args.device, fs=args.sample_rate, duration=args.duration, channels=args.channels)

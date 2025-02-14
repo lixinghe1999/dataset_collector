@@ -2,3 +2,4 @@ ntplib
 datetime
 sounddevice
 wave
+numpy

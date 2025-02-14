@@ -14,11 +14,11 @@ def get_device_index_by_name(device_name):
         matching_devices.sort(key=lambda x: x[0])
         return matching_devices[0][0]  # Return the index of the first match
     return 0
-def receive_audio(dataset_folder, fs=48000, duration=5, channels=2):
+def receive_audio(dataset_folder, device, fs=48000, duration=5, channels=2):
     '''
     receive by sounddevice and save the audio data
     '''
-    idx = get_device_index_by_name('(YDM8MIC Audio)')
+    idx = get_device_index_by_name('device')
     print(f'Using device index: {idx}')
     # Set the parameters
     sd.default.device = idx
