@@ -6,6 +6,7 @@ import datetime
 
 def get_device_index_by_name(device_name):
     devices = sd.query_devices()
+    print(devices)
     devices = [(i, device['name']) for i, device in enumerate(devices)]
     matching_devices = [(index, name) for index, name in devices if device_name.lower() in name.lower()]
 
