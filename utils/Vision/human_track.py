@@ -3,92 +3,78 @@ import numpy as np                        # fundamental package for scientific c
 import matplotlib.pyplot as plt           # 2D plotting library producing publication quality figures
 import pyrealsense2 as rs                 # Intel RealSense cross-platform open-source API
 
-def show_image(frameset):
-    color_frame = frameset.get_color_frame()
-    depth_frame = frameset.get_depth_frame()
+
+
+def mediapipe_facemesh(frameset, max_num_faces=1, plot=False):
+    import mediapipe as mp
+    image_color = frameset.get_color_frame()
+    image = np.asanyarray(image_color.get_data())
+    mp_drawing = mp.solutions.drawing_utils
+    mp_drawing_styles = mp.solutions.drawing_styles
+    mp_face_mesh = mp.solutions.face_mesh
+    drawing_spec = mp_drawing.DrawingSpec(thickness=1, circle_radius=1)
+    face_mesh = mp_face_mesh.FaceMesh(
+        static_image_mode=True,
+        max_num_faces=max_num_faces,
+        refine_landmarks=True,
+        min_detection_confidence=0.5)
+    results = face_mesh.process(image)
+    multi_face_landmarks = results.multi_face_landmarks
+    annotated_image = image.copy()
+    if plot:
+      for face_landmarks in multi_face_landmarks:
+        mp_drawing.draw_landmarks(
+            image=annotated_image,
+            landmark_list=face_landmarks,
+            connections=mp_face_mesh.FACEMESH_TESSELATION,
+            landmark_drawing_spec=None,
+            connection_drawing_spec=mp_drawing_styles
+            .get_default_face_mesh_tesselation_style())
+        mp_drawing.draw_landmarks(
+            image=annotated_image,
+            landmark_list=face_landmarks,
+            connections=mp_face_mesh.FACEMESH_CONTOURS,
+            landmark_drawing_spec=None,
+            connection_drawing_spec=mp_drawing_styles
+            .get_default_face_mesh_contours_style())
+        mp_drawing.draw_landmarks(
+            image=annotated_image,
+            landmark_list=face_landmarks,
+            connections=mp_face_mesh.FACEMESH_IRISES,
+            landmark_drawing_spec=None,
+            connection_drawing_spec=mp_drawing_styles
+            .get_default_face_mesh_iris_connections_style())
+    return multi_face_landmarks, annotated_image
+
+def normal_vector(landmarks):
+    from .facemesh import MESH_ANNOTATIONS
+
+    silhouette_indices = MESH_ANNOTATIONS["silhouette"]
+    silhouette_points = landmarks[silhouette_indices]
+    # Calculate the normal vector of the plane
+    # https://math.stackexchange.com/questions/99299/best-fitting-plane-given-a-set-of-points
+    A = np.cov(silhouette_points.T)
+    _, _, V = np.linalg.svd(A)
+    normal = V[2]
+    return normal
+
+def landmarks_3d(landmarks, normal_vec):
+      face_mean = np.mean(landmarks, axis=0)
+      # 3D scatter plot
+      fig = plt.figure()
+      ax = fig.add_subplot(111, projection='3d')
+      # plot the normal vector
+      ax.quiver(face_mean[0], face_mean[1], face_mean[2], normal_vec[0], normal_vec[1], normal_vec[2], color='r')
+
+      ax.scatter(landmarks[:, 0], landmarks[:, 1], landmarks[:, 2])
+      from .facemesh import MESH_ANNOTATIONS
+
+      silhouette_indices = MESH_ANNOTATIONS["silhouette"]
+      ax.scatter(landmarks[silhouette_indices, 0], landmarks[silhouette_indices, 1], landmarks[silhouette_indices, 2], color='r')
+
+      ax.set_xlabel('X')
+      ax.set_ylabel('Y')
+      ax.set_zlabel('Z')
+      plt.show()
+
     
-    color = np.asanyarray(color_frame.get_data())
-    color = cv2.cvtColor(color, cv2.COLOR_BGR2RGB)
-
-    colorizer = rs.colorizer()
-    # Create alignment primitive with color as its target stream:
-    align = rs.align(rs.stream.color)
-    frameset = align.process(frameset)
-
-    # Update color and depth frames:
-    aligned_depth_frame = frameset.get_depth_frame()
-    colorized_depth = np.asanyarray(colorizer.colorize(aligned_depth_frame).get_data())
-
-    # Show the two frames together:
-    images = np.hstack((color, colorized_depth))
-
-    plt.rcParams["axes.grid"] = False
-    plt.rcParams['figure.figsize'] = [12, 6]
-    plt.imshow(images)
-    plt.show()
-
-
-def mediapipe_facemesh(image):
-  results = face_mesh.process(cv2.cvtColor(image, cv2.COLOR_BGR2RGB))
-  annotated_image = image.copy()
-  for face_landmarks in results.multi_face_landmarks:
-    print(face_landmarks)
-    mp_drawing.draw_landmarks(
-        image=annotated_image,
-        landmark_list=face_landmarks,
-        connections=mp_face_mesh.FACEMESH_TESSELATION,
-        landmark_drawing_spec=None,
-        connection_drawing_spec=mp_drawing_styles
-        .get_default_face_mesh_tesselation_style())
-    mp_drawing.draw_landmarks(
-        image=annotated_image,
-        landmark_list=face_landmarks,
-        connections=mp_face_mesh.FACEMESH_CONTOURS,
-        landmark_drawing_spec=None,
-        connection_drawing_spec=mp_drawing_styles
-        .get_default_face_mesh_contours_style())
-    mp_drawing.draw_landmarks(
-        image=annotated_image,
-        landmark_list=face_landmarks,
-        connections=mp_face_mesh.FACEMESH_IRISES,
-        landmark_drawing_spec=None,
-        connection_drawing_spec=mp_drawing_styles
-        .get_default_face_mesh_iris_connections_style())
-  cv2.imwrite('./test.png', annotated_image)
-# Setup:
-pipe = rs.pipeline()
-cfg = rs.config()
-cfg.enable_device_from_file("./dataset/tof/test.bag")
-profile = pipe.start(cfg)
-
-# Skip 5 first frames to give the Auto-Exposure time to adjust
-for x in range(5):
-  pipe.wait_for_frames()
-  
-# Store next frameset for later processing:
-frameset = pipe.wait_for_frames()
-
-# Cleanup:
-pipe.stop()
-print("Frames Captured")
-
-# show_image(frameset)
-
-import cv2
-import mediapipe as mp
-mp_drawing = mp.solutions.drawing_utils
-mp_drawing_styles = mp.solutions.drawing_styles
-mp_face_mesh = mp.solutions.face_mesh
-
-# For static images:
-IMAGE_FILES = []
-drawing_spec = mp_drawing.DrawingSpec(thickness=1, circle_radius=1)
-with mp_face_mesh.FaceMesh(
-    static_image_mode=True,
-    max_num_faces=1,
-    refine_landmarks=True,
-    min_detection_confidence=0.5) as face_mesh:
-  
-  image_color = frameset.get_color_frame()
-  image = np.asanyarray(image_color.get_data())
-  mediapipe_facemesh(image)

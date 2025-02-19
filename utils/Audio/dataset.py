@@ -17,9 +17,6 @@ def get_chirp(sample_rate=44100, duration=5.0, min_freq=100, max_freq=8000, save
         wavfile.write(save_name, sample_rate, (chirp * 32767).astype(np.int16))
     return chirp
 
-
-
-
 def TIMIT_sample(num_samples=1):
     folder = 'dataset/TIMIT/TRAIN/'
     filtered_audio_list = []
@@ -30,14 +27,15 @@ def TIMIT_sample(num_samples=1):
     random_audio = random.sample(filtered_audio_list, num_samples)
     return random_audio
 
-esc50_subtask = {
+
+
+def ESC50_sample(category, num_samples=1):
+    esc50_subtask = {
     'natural': ['rain', 'sea_waves', 'crickets', 'chirping_birds', 'water_drops', 'wind', 'pouring_water', 'toilet_flush', 'thunderstorm'],
     'human': ['crying_baby', 'sneezing', 'clapping', 'breathing', 'coughing', 'footsteps', 'laughing', 'brushing_teeth', 'snoring', 'drinking_sipping'],
     'domestic': ['door_wood_knock', 'mouse_click', 'keyboard_typing', 'door_wood_creaks', 'can_opening', 'washing_machine', 'vacuum_cleaner', 'clock_alarm', 'clock_tick', 'glass_breaking'],
     'urban':['helicopter', 'chainsaw', 'siren', 'car_horn', 'engine', 'train', 'church_bells', 'airplane', 'fireworks', 'hand_saw'],
-    }
-
-def ESC50_sample(category, num_samples=1): 
+    } 
     assert category in ['natural', 'human', 'domestic', 'urban']
     folder = 'dataset/ESC-50-master/audio/'
     meta_esc50 = pd.read_csv(folder + '../meta/esc50.csv')
@@ -66,15 +64,15 @@ def audio_sample(category, num_samples=1):
         return ESC50_sample(category, num_samples)
     else:
         raise ValueError('Invalid category')
-if __name__ == '__main__':
-    # audio = NIGENS_sample()
+# if __name__ == '__main__':
+#     # audio = NIGENS_sample()
 
-    sine_wave = get_chirp(sample_rate=44100, duration=1.0, min_freq=2000, max_freq=4000)
+#     sine_wave = get_chirp(sample_rate=44100, duration=1.0, min_freq=2000, max_freq=4000)
 
-    import matplotlib.pyplot as plt
-    import numpy as np
+#     import matplotlib.pyplot as plt
+#     import numpy as np
 
-    self_correlation = np.correlate(sine_wave, sine_wave, mode='full')
-    plt.plot(self_correlation)
-    plt.show()
+#     self_correlation = np.correlate(sine_wave, sine_wave, mode='full')
+#     plt.plot(self_correlation)
+#     plt.show()
 

@@ -1,4 +1,4 @@
-from utils.Audio.audio_record import receive_audio
+from utils.Audio.record import receive_audio
 import datetime
 import os 
 import argparse
