@@ -28,15 +28,18 @@ def adjust_audio_dbfs(audio, target_dbfs):
     return audio_adjusted
 
 def audio_prepare(left_name, right_name, duration_samples, sr, db):
-    left_audio, fs = librosa.load(left_name, sr=sr)
-    right_audio, fs = librosa.load(right_name, sr=sr)
-    
     random_dbfs = np.random.uniform(-5, 5)
-    left_audio = adjust_audio_dbfs(left_audio, db + random_dbfs)
+    if left_name is None:
+        left_audio = np.zeros(duration_samples)
+    else:
+        left_audio, fs = librosa.load(left_name, sr=sr)
+        left_audio = adjust_audio_dbfs(left_audio, db + random_dbfs)
 
-    random_dbfs = np.random.uniform(-5, 5)
-    right_audio = adjust_audio_dbfs(right_audio, db + random_dbfs)
-    
+    if right_name is None:
+        right_audio = np.zeros(duration_samples)
+    else:
+        right_audio, fs = librosa.load(right_name, sr=sr)
+        right_audio = adjust_audio_dbfs(right_audio, db + random_dbfs)
     max_length = max(len(left_audio), len(right_audio))
     stereo_audio = np.zeros((max_length, 2))
     stereo_audio[:len(left_audio), 0] = left_audio
@@ -46,11 +49,12 @@ def audio_prepare(left_name, right_name, duration_samples, sr, db):
     
     return stereo_audio
 
-def chirp_play(stereo_audio, sr):   
-    # add chirp to denote the start of the audio
-    chirp = get_chirp(sample_rate=sr, duration=1.0, min_freq=2000, max_freq=4000)
-    stereo_chirp = np.stack([chirp, chirp], axis=1)
-    # stereo_audio = np.concatenate([stereo_chirp, stereo_audio], axis=0)
+def chirp_play(stereo_audio, sr, chirp=True):   
+    if chirp:
+        # add chirp to denote the start of the audio
+        chirp = get_chirp(sample_rate=sr, duration=1.0, min_freq=2000, max_freq=4000)
+        stereo_chirp = np.stack([chirp, chirp], axis=1)
+        stereo_audio = np.concatenate([stereo_chirp, stereo_audio], axis=0)
     print('Playing audio...')
     sd.play(stereo_audio, sr, blocking=True)
     

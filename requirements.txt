@@ -3,3 +3,5 @@ datetime
 sounddevice
 wave
 numpy
+pandas
+matplotlib
