@@ -15,4 +15,7 @@ if __name__ == '__main__':
     dataset_folder = os.path.join('recording', date_str)
     os.makedirs(dataset_folder, exist_ok=True)
     
-    receive_audio(dataset_folder, device=args.device, fs=args.sample_rate, duration=args.duration, channels=args.channels)
+    CHUNK_RECORD = 10
+    num_chunks = args.duration // CHUNK_RECORD
+    for i in range(num_chunks+1):
+        receive_audio(dataset_folder, device=args.device, fs=args.sample_rate, duration=args.duration, channels=args.channels)
