@@ -4,7 +4,7 @@ import os
 import argparse
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('--device', type=str, default="Yundea Audio")
+    parser.add_argument('--device', type=str, default="Yundea")
     parser.add_argument('--duration', type=int, default=1)
     parser.add_argument('--sample_rate', type=int, default=48000)
     parser.add_argument('--channels', type=int, default=2)

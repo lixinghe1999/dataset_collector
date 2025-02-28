@@ -12,14 +12,14 @@ def get_device_index_by_name(device_name):
     if matching_devices:
         # Sort by index priority (lower index preferred)
         matching_devices.sort(key=lambda x: x[0])
-        return matching_devices[0][0]  # Return the index of the first match
-    return 0
+        return matching_devices[0][0], matching_devices[0][1] # Return the index of the first match
+    return 0, 'default'
 def receive_audio(dataset_folder, device, fs=48000, duration=5, channels=2):
     '''
     receive by sounddevice and save the audio data
     '''
-    idx = get_device_index_by_name(device)
-    print(f'Using device index: {idx}')
+    idx, device_name = get_device_index_by_name(device)
+    print(f'Using device index: {idx}, device name: {device_name}')
     # Set the parameters
     sd.default.device = idx
     default_channels = sd.query_devices(sd.default.device[1])['max_input_channels']
