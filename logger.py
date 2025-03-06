@@ -35,6 +35,8 @@ input_rows = [create_input_row(font_size, 0)]
 layout = [
     [sg.Text("Source type refers to device id (01, 02) or loudspeaker id (left, right)", font=('Helvetica', font_size), size=(60, 1))],
     [sg.Text("The first source is typically at (0, 0) with 90 degrees orientation.", font=('Helvetica', font_size), size=(60, 1))],
+    [sg.Text("Recording time:", font=('Helvetica', font_size), size=(15, 1)),     
+             sg.InputText(size=(15, 1), font=('Helvetica', font_size), key=f'recording_time')],
     [sg.Text("Source Type", font=('Helvetica', font_size), size=(15, 1)), 
      sg.Text("Location (X, Y)", font=('Helvetica', font_size), size=(15, 1)),
      sg.Text("Orientation", font=('Helvetica', font_size), size=(15, 1)),   
@@ -73,9 +75,7 @@ while True:
 
     if event == "Record":
         # Gather all values from the input fields
-        values = [window[key].Get() for key in window.AllKeysDict if key.endswith('_type')]
         sources = []
-        
         for i in range(row_counter):
             row_data = [window[f'{i}_type'].Get(), window[f'{i}_location'].Get(), 
                         window[f'{i}_orientation'].Get(), window[f'{i}_identity'].Get(), 
@@ -86,7 +86,8 @@ while True:
                     "location": row_data[1],
                     "orientation": row_data[2],
                     "identity": row_data[3],
-                    "voice": row_data[4]
+                    "voice": row_data[4],
+                    "time": window['recording_time'].Get()
                 })
         
         # Save to CSV
