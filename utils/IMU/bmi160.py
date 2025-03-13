@@ -87,7 +87,7 @@ def receive_imu(dataset_folder, sample_rate=1600, t=5, port=1):
             data = sensor.getMotion6() # gx, gy, gz, ax, ay, az
             # imu += str(data[0]) + ' ' + str(data[1]) + ' ' + str(data[2]) + ' ' + str(data[3]) + ' ' \
             #         + str(data[4]) + ' ' + str(data[5]) + ' ' + str(time.time() - t_start) + '\n'
-            imu.append(data + [time.time() - t_start])
+            imu.append(list(data) + [time.time() - t_start])
             i += 1
     # writer.write(imu)
     np.savetxt(filename, np.array(imu))
