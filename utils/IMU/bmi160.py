@@ -1,6 +1,7 @@
 import time
 from BMI160_i2c import Driver
-
+import datetime
+import os
 map_rate_acc = {
     1600: 12,
     800: 11,
@@ -71,9 +72,10 @@ def receive_imu(dataset_folder, sample_rate=1600, t=5, port=1):
     sensor = Driver(0x69, port) # change address if needed
     sensor.set_gyro_rate(map_rate_gyro[sample_rate])
     sensor.set_accel_rate(map_rate_acc[sample_rate])
-    i = 0
-    time_start = time.time()
-    writer = open(dataset_folder + f'/{str(time_start)}_{str(port)}.txt', 'w')
+    i = 0    
+    datetime_str = datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S-%f')
+    filename = os.path.join(dataset_folder, f'{datetime_str}.txt')
+    writer = open(filename, 'w')
     imu = ''
     t_start = time.time()
     # sensor.setIntDataReadyEnabled(True)
