@@ -92,7 +92,7 @@ def receive_imu(dataset_folder, sample_rate=1600, t=5, port=1):
             imu.append(list(data) + [time.time() - t_start])
             i += 1
     # writer.write(imu)
-    np.savetxt(filename, np.array(imu))
+    np.savetxt(filename, np.array(imu, dtype=np.int32))
     real_sample_rate = sample_rate * t / (time.time() - t_start)
     print('IMU saved at:', filename)
     print('the real sample rate is:', real_sample_rate)
