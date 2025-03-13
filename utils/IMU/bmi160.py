@@ -2,6 +2,7 @@ import time
 from BMI160_i2c import Driver
 import datetime
 import os
+import numpy as np
 map_rate_acc = {
     1600: 12,
     800: 11,
@@ -77,16 +78,19 @@ def receive_imu(dataset_folder, sample_rate=1600, t=5, port=1):
     filename = os.path.join(dataset_folder, f'{datetime_str}.txt')
     writer = open(filename, 'w')
     imu = ''
+    imu = []
     t_start = time.time()
     # sensor.setIntDataReadyEnabled(True)
     while i < sample_rate * t:
         if sensor.getIntACCDataReadyStatus() and sensor.getIntGYRODataReadyStatus():
         # if sensor.getIntDataReadyEnabled():
             data = sensor.getMotion6() # gx, gy, gz, ax, ay, az
-            imu += str(data[0]) + ' ' + str(data[1]) + ' ' + str(data[2]) + ' ' + str(data[3]) + ' ' \
-                    + str(data[4]) + ' ' + str(data[5]) + ' ' + str(time.time()) + '\n'
+            # imu += str(data[0]) + ' ' + str(data[1]) + ' ' + str(data[2]) + ' ' + str(data[3]) + ' ' \
+            #         + str(data[4]) + ' ' + str(data[5]) + ' ' + str(time.time() - t_start) + '\n'
+            imu.append(data + [time.time() - t_start])
             i += 1
-    writer.write(imu)
+    # writer.write(imu)
+    np.savetxt(filename, np.array(imu))
     real_sample_rate = sample_rate * t / (time.time() - t_start)
     print('IMU port:', port, 'sample rate:', real_sample_rate)
     return real_sample_rate
