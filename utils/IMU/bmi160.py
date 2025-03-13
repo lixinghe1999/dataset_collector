@@ -70,6 +70,7 @@ def bmi160_gyrosave(dataset_folder, sample_rate=1600, t=5, port=0):
     return real_sample_rate
 
 def receive_imu(dataset_folder, sample_rate=1600, t=5, port=1):
+    print(f'IMU recording start, port: {port}')
     sensor = Driver(0x69, port) # change address if needed
     sensor.set_gyro_rate(map_rate_gyro[sample_rate])
     sensor.set_accel_rate(map_rate_acc[sample_rate])
@@ -92,7 +93,8 @@ def receive_imu(dataset_folder, sample_rate=1600, t=5, port=1):
     # writer.write(imu)
     np.savetxt(filename, np.array(imu))
     real_sample_rate = sample_rate * t / (time.time() - t_start)
-    print('IMU port:', port, 'sample rate:', real_sample_rate)
+    print('IMU saved at:', filename)
+    print('the real sample rate is:', real_sample_rate)
     return real_sample_rate
 def vis(file):
     import matplotlib.pyplot as plt
