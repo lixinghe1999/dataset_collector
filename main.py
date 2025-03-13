@@ -35,7 +35,6 @@ def main():
     
     # IMU data collection arguments
     parser.add_argument('--imu_sample_rate', type=int, default=200, help="IMU sample rate")
-    parser.add_argument('--imu_duration', type=int, default=5, help="Duration for IMU data collection")
     parser.add_argument('--imu_port', type=int, default=1, help="Port for IMU data collection")
 
     args = parser.parse_args()
@@ -54,7 +53,7 @@ def main():
         processes.append(audio_process)
 
     if args.mode in ['imu', 'both']:
-        imu_process = multiprocessing.Process(target=imu_recording, args=(dataset_folder, args.imu_sample_rate, args.imu_duration, args.imu_port))
+        imu_process = multiprocessing.Process(target=imu_recording, args=(dataset_folder, args.imu_sample_rate, args.duration, args.imu_port))
         processes.append(imu_process)
 
     # Start all processes
