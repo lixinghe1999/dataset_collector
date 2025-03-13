@@ -86,10 +86,10 @@ def receive_imu(dataset_folder, sample_rate=1600, t=5, port=1):
         if sensor.getIntACCDataReadyStatus() and sensor.getIntGYRODataReadyStatus():
         # if sensor.getIntDataReadyEnabled():
             data = sensor.getMotion6() # gx, gy, gz, ax, ay, az
-            print(data)
             # imu += str(data[0]) + ' ' + str(data[1]) + ' ' + str(data[2]) + ' ' + str(data[3]) + ' ' \
             #         + str(data[4]) + ' ' + str(data[5]) + ' ' + str(time.time() - t_start) + '\n'
             imu.append(list(data) + [time.time() - t_start])
+            print(imu[-1])
             i += 1
     # writer.write(imu)
     np.savetxt(filename, np.array(imu, dtype=np.int32))
