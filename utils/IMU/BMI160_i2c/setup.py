@@ -11,8 +11,6 @@ setup(
     author='Lixing He',
     author_email='your.email@example.com',
     description='A short description of your package',
-    long_description=open('README.md').read(),
-    long_description_content_type='text/markdown',
     url='https://github.com/yourusername/your_package',  # Your package URL
     classifiers=[
         'Programming Language :: Python :: 3',
