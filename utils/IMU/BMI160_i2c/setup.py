@@ -5,7 +5,6 @@ setup(
     version='0.1.0',
     packages=find_packages(),
     install_requires=[  # List your dependencies here
-        'subprocess',  # Example dependency
         'smbus2',
     ],
     author='Lixing He',
