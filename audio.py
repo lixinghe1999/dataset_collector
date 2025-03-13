@@ -1,24 +1,69 @@
-from utils.Audio.record import receive_audio
-import datetime
-import os 
 import argparse
-if __name__ == '__main__':
+import datetime
+import os
+import multiprocessing
+from utils.Audio.record import receive_audio
+from utils.IMU.bmi160 import receive_imu
+
+
+def audio_recording(dataset_folder, device, sample_rate, duration, channels):
+    if duration > 0:
+        receive_audio(dataset_folder, device=device, fs=sample_rate, duration=duration, channels=channels)
+    else:  # duration = -1, infinite loop for data recording
+        while True:
+            segment_duration = 10
+            receive_audio(dataset_folder, device=device, fs=sample_rate, duration=segment_duration, channels=channels)
+def imu_recording(dataset_folder, sample_rate, duration, port):
+    if duration > 0:
+        receive_imu(dataset_folder, sample_rate=sample_rate, t=duration, port=port)
+    else:  # duration = -1, infinite loop for data recording
+        while True:
+            segment_duration = 10
+            receive_imu(dataset_folder, sample_rate=sample_rate, t=segment_duration, port=port)
+def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument('--device', type=str, default="Yundea") # Yundea - 8Mics, Device - 2Mics,Binaural
-    parser.add_argument('--duration', type=int, default=1)
-    parser.add_argument('--sample_rate', type=int, default=48000)
-    parser.add_argument('--channels', type=int, default=2)
+
+    # General mode selection
+    parser.add_argument('--mode', type=str, choices=['audio', 'imu', 'both'], required=True,
+                        help="Select mode: 'audio' for audio-only, 'imu' for IMU-only, 'both' for both.")
+
+    # Audio recording arguments
+    parser.add_argument('--device', type=str, default="Yundea", help="Audio device to use (e.g., Yundea, Device)")
+    parser.add_argument('--duration', type=int, default=1, help="Duration of audio recording in seconds (-1 for infinite)")
+    parser.add_argument('--sample_rate', type=int, default=48000, help="Audio sample rate")
+    parser.add_argument('--channels', type=int, default=2, help="Number of audio channels")
+    
+    # IMU data collection arguments
+    parser.add_argument('--imu_sample_rate', type=int, default=1600, help="IMU sample rate")
+    parser.add_argument('--imu_duration', type=int, default=5, help="Duration for IMU data collection")
+    parser.add_argument('--imu_port', type=int, default=1, help="Port for IMU data collection")
+
     args = parser.parse_args()
 
+    # Create the dataset folder
     os.makedirs('recording', exist_ok=True)
     date_str = datetime.datetime.now().strftime("%Y-%m-%d")
     dataset_folder = os.path.join('recording', date_str)
     os.makedirs(dataset_folder, exist_ok=True)
-    
-    if args.duration > 0:
-        receive_audio(dataset_folder, device=args.device, fs=args.sample_rate, duration=args.duration, channels=args.channels)
-    else: # duration = -1, infinite loop for data recording
-        while True:
-            segment_duration = 10
-            receive_audio(dataset_folder, device=args.device, fs=args.sample_rate, duration=segment_duration, channels=args.channels)
-            
+
+    # Create processes for audio and IMU data collection
+    processes = []
+
+    if args.mode in ['audio', 'both']:
+        audio_process = multiprocessing.Process(target=audio_recording, args=(dataset_folder, args.device, args.sample_rate, args.duration, args.channels))
+        processes.append(audio_process)
+
+    if args.mode in ['imu', 'both']:
+        imu_process = multiprocessing.Process(target=imu_recording, args=(dataset_folder, args.imu_sample_rate, args.imu_duration, args.imu_port))
+        processes.append(imu_process)
+
+    # Start all processes
+    for process in processes:
+        process.start()
+
+    # Join all processes to wait for them to finish
+    for process in processes:
+        process.join()
+
+if __name__ == '__main__':
+    main()
