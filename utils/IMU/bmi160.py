@@ -1,5 +1,5 @@
 import time
-from .BMI160_i2c import Driver
+from BMI160_i2c import Driver
 
 map_rate_acc = {
     1600: 12,
