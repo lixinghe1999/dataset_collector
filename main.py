@@ -31,10 +31,10 @@ def main():
     parser.add_argument('--device', type=str, default="Yundea", help="Audio device to use (e.g., Yundea, Device)")
     parser.add_argument('--duration', type=int, default=1, help="Duration of audio recording in seconds (-1 for infinite)")
     parser.add_argument('--sample_rate', type=int, default=48000, help="Audio sample rate")
-    parser.add_argument('--channels', type=int, default=2, help="Number of audio channels")
+    # parser.add_argument('--channels', type=int, default=2, help="Number of audio channels")
     
     # IMU data collection arguments
-    parser.add_argument('--imu_sample_rate', type=int, default=200, help="IMU sample rate")
+    parser.add_argument('--imu_sample_rate', type=int, default=100, help="IMU sample rate")
     parser.add_argument('--imu_port', type=int, default=1, help="Port for IMU data collection")
 
     args = parser.parse_args()
@@ -49,7 +49,11 @@ def main():
     processes = []
 
     if args.mode in ['audio', 'both']:
-        audio_process = multiprocessing.Process(target=audio_recording, args=(dataset_folder, args.device, args.sample_rate, args.duration, args.channels))
+        if args.device == 'Yundea':
+            num_channels = 8
+        else:
+            num_channels = 2
+        audio_process = multiprocessing.Process(target=audio_recording, args=(dataset_folder, args.device, args.sample_rate, args.duration, num_channels))
         processes.append(audio_process)
 
     if args.mode in ['imu', 'both']:
