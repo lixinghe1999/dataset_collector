@@ -6,13 +6,13 @@ from utils.Audio.record import receive_audio
 from utils.IMU.bmi160 import receive_imu
 
 
-def audio_recording(dataset_folder, device, sample_rate, duration, channels):
+def audio_recording(dataset_folder, device, duration):
     if duration > 0:
-        receive_audio(dataset_folder, device=device, fs=sample_rate, duration=duration, channels=channels)
+        receive_audio(dataset_folder, device=device, duration=duration)
     else:  # duration = -1, infinite loop for data recording
         while True:
             segment_duration = 10
-            receive_audio(dataset_folder, device=device, fs=sample_rate, duration=segment_duration, channels=channels)
+            receive_audio(dataset_folder, device=device, duration=segment_duration)
 def imu_recording(dataset_folder, sample_rate, duration, port):
     if duration > 0:
         receive_imu(dataset_folder, sample_rate=sample_rate, t=duration, port=port)
@@ -51,11 +51,7 @@ def main():
     processes = []
 
     if args.mode in ['audio', 'both']:
-        if args.device == 'Yundea':
-            num_channels = 8
-        else:
-            num_channels = 2
-        audio_process = multiprocessing.Process(target=audio_recording, args=(dataset_folder, args.device, args.sample_rate, args.duration, num_channels))
+        audio_process = multiprocessing.Process(target=audio_recording, args=(dataset_folder, args.device, args.duration))
         processes.append(audio_process)
 
     if args.mode in ['imu', 'both']:
