@@ -20,6 +20,8 @@ def imu_recording(dataset_folder, sample_rate, duration, port):
         while True:
             segment_duration = 10
             receive_imu(dataset_folder, sample_rate=sample_rate, t=segment_duration, port=port)
+
+
 def main():
     parser = argparse.ArgumentParser()
 
@@ -28,7 +30,7 @@ def main():
                         help="Select mode: 'audio' for audio-only, 'imu' for IMU-only, 'both' for both.")
 
     # Audio recording arguments
-    parser.add_argument('--device', type=str, default="Yundea", help="Audio device to use (e.g., Yundea, Device)")
+    parser.add_argument('--device', type=str, nargs='+', default=["Yundea"], help="Audio device(s) to use (e.g., Yundea, Device)")    
     parser.add_argument('--duration', type=int, default=1, help="Duration of audio recording in seconds (-1 for infinite)")
     parser.add_argument('--sample_rate', type=int, default=48000, help="Audio sample rate")
     # parser.add_argument('--channels', type=int, default=2, help="Number of audio channels")

@@ -3,6 +3,12 @@ import wave
 import os
 import datetime
 
+def get_multiple_device_index_by_sort(device_names):
+    for device_name in device_names:
+        idx, device_name = get_device_index_by_name(device_name)
+        if device_name != 'default':
+            return idx, device_name
+    return 0, 'default'
 
 def get_device_index_by_name(device_name):
     devices = sd.query_devices()
@@ -14,11 +20,17 @@ def get_device_index_by_name(device_name):
         matching_devices.sort(key=lambda x: x[0])
         return matching_devices[0][0], matching_devices[0][1] # Return the index of the first match
     return 0, 'default'
+
+
 def receive_audio(dataset_folder, device, fs=48000, duration=5, channels=2):
     '''
     receive by sounddevice and save the audio data
     '''
-    idx, device_name = get_device_index_by_name(device)
+    # if type(device) == str:
+    #     idx, device_name = get_device_index_by_name(device)
+    # else:
+    idx, device_name = get_multiple_device_index_by_sort(device)
+
     print(f'Using device index: {idx}, device name: {device_name}')
     # Set the parameters
     sd.default.device = idx
