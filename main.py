@@ -5,13 +5,17 @@ import multiprocessing
 from utils.Audio.record import receive_audio
 from utils.IMU.bmi160 import receive_imu
 
+segment_duration = 10
 
 def audio_recording(dataset_folder, device, duration):
     if duration > 0:
-        receive_audio(dataset_folder, device=device, duration=duration)
+        if duration > 100: # save in segments to avoid crash
+            for i in range(0, duration, segment_duration):
+                receive_audio(dataset_folder, device=device, duration=segment_duration)
+        else:
+            receive_audio(dataset_folder, device=device, duration=duration)
     else:  # duration = -1, infinite loop for data recording
         while True:
-            segment_duration = 10
             receive_audio(dataset_folder, device=device, duration=segment_duration)
 def imu_recording(dataset_folder, sample_rate, duration, port):
     if duration > 0:
