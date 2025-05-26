@@ -11,6 +11,7 @@ def get_device_index_by_list(device_names):
     return 0, 'default'
 
 def get_device_index_by_name(device_name):
+    print(f'Looking for device: {device_name}')
     devices = sd.query_devices()
     devices = [(i, device['name']) for i, device in enumerate(devices)]
     matching_devices = [(index, name) for index, name in devices if device_name.lower() in name.lower()]
