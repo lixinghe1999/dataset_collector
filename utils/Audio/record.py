@@ -10,17 +10,22 @@ def get_device_index_by_list(device_names):
             return idx, device_name
     return 0, 'default'
 
-def get_device_index_by_name(device_name):
+def get_device_index_by_name(device_name, record=True): 
     print(f'Looking for device: {device_name}')
     devices = sd.query_devices()
-    devices = [(i, device['name']) for i, device in enumerate(devices)]
+    if record: # only keep the microphone, input devices
+        devices = [device for device in devices if device['max_input_channels'] > 0]
+    else: # only keep the speaker, output devices
+        devices = [device for device in devices if device['max_output_channels'] > 0]
+    
+    devices = [(device['index'], device['name']) for i, device in enumerate(devices)]
     matching_devices = [(index, name) for index, name in devices if device_name.lower() in name.lower()]
 
     if matching_devices:
         # Sort by index priority (lower index preferred)
         matching_devices.sort(key=lambda x: x[0])
         return matching_devices[0][0], matching_devices[0][1] # Return the index of the first match
-    return 0, 'default'
+    return devices[0]
 
 
 def receive_audio(dataset_folder, device, duration=5):
@@ -30,7 +35,11 @@ def receive_audio(dataset_folder, device, duration=5):
     # if type(device) == str:
     #     idx, device_name = get_device_index_by_name(device)
     # else:
-    idx, device_name = get_device_index_by_list(device)
+    if isinstance(device, list):
+        idx, device_name = get_device_index_by_list(device)
+    else:
+        idx = device
+        device_name = sd.query_devices(idx)['name']
     # Set the parameters
     sd.default.device = idx
     fs = sd.query_devices(sd.default.device[1])['default_samplerate']
@@ -58,4 +67,11 @@ def receive_audio(dataset_folder, device, duration=5):
     print(f'Audio saved at {filename} ...')
 
 if __name__ == "__main__":
-    receive_audio('.')
+    import argparse
+    parser = argparse.ArgumentParser(description='Record audio from a specified device.')
+    parser.add_argument('--dataset_folder', type=str, required=True)
+    parser.add_argument('--device', type=int, required=True,)
+    parser.add_argument('--duration', type=int, default=5, help='Duration of the recording in seconds.')
+
+    args = parser.parse_args()
+    receive_audio(args.dataset_folder, args.device, args.duration)

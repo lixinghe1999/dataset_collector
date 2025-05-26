@@ -1,6 +1,6 @@
 from loggers.location_logger import init_layout_location, record_location
 from loggers.speech_logger import init_layout_speech, record_speech
-import PySimpleGUI as sg
+import FreeSimpleGUI as sg
 
 if __name__ == "__main__":
     sg.set_options(suppress_raise_key_errors=False, suppress_error_popups=False, suppress_key_guessing=False)

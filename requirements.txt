@@ -5,3 +5,4 @@ wave
 numpy
 pandas
 matplotlib
+FreeSimpleGUI
