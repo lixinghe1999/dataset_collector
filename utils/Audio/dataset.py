@@ -4,7 +4,7 @@ select a random audio sample from the ESC50 and TIMIT by type
 import pandas as pd
 import random
 import os
-import scipy.io.wavfile as wavfile
+import soundfile as sf
 import librosa
 
 def get_chirp(sample_rate=44100, duration=5.0, min_freq=100, max_freq=8000, save_name=None):
@@ -14,7 +14,7 @@ def get_chirp(sample_rate=44100, duration=5.0, min_freq=100, max_freq=8000, save
     chirp = np.sin(2 * np.pi * (min_freq + (max_freq - min_freq) * t / duration) * t)
     # Save the chirp to a WAV file
     if save_name is not None:
-        wavfile.write(save_name, sample_rate, (chirp * 32767).astype(np.int16))
+        sf.write(save_name, chirp, sample_rate)
     return chirp
 
 def TIMIT_sample(num_samples=1):

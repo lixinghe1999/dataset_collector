@@ -58,18 +58,35 @@ def chirp_play(stereo_audio, sr, chirp=True):
     print('Playing audio...')
     sd.play(stereo_audio, sr, blocking=True)
     
-def play_audio(play_file, device, duration=5):
+def play_audio(play_file, device, duration=5, channel='mono'):
     '''
     Play audio from a specified file with a given device.
     '''
     audio, sr = librosa.load(play_file, sr=None)
+    if duration <= 0:
+        infinite_duration = True
+        duration = 10  # default to 5 seconds if duration is not specified
+    else:
+        infinite_duration = False
     if len(audio) < duration * sr:
         # repeat the audio to fill the duration
         audio = np.tile(audio, int(np.ceil((duration * sr) / len(audio))))
     audio = audio[:duration * sr]  # trim to the exact duration
-    sd.play(audio, samplerate=sr, device=device,)
-    sd.wait()  # Wait until the audio is finished playing
-    print(f'Audio played from {play_file} on device {device} for {duration} seconds.')
+    if channel == 'left':
+        audio = np.stack([audio, np.zeros_like(audio)], axis=1)
+    elif channel == 'right':
+        audio = np.stack([np.zeros_like(audio), audio], axis=1)
+    elif channel == 'mono':
+        audio = audio
+    if infinite_duration:
+        while True:
+            sd.play(audio, samplerate=sr, device=device,)
+            sd.wait()
+            print(f'Audio played from {play_file} on device {device} for {duration} seconds.')
+    else:
+        sd.play(audio, samplerate=sr, device=device,)
+        sd.wait()  # Wait until the audio is finished playing
+        print(f'Audio played from {play_file} on device {device} for {duration} seconds.')
 
 if __name__ == "__main__":
     import argparse
@@ -77,7 +94,8 @@ if __name__ == "__main__":
     parser.add_argument('--play_file', type=str, required=True)
     parser.add_argument('--device', type=int, required=True,)
     parser.add_argument('--duration', type=int, default=5, help='Duration of the audio to play in seconds')
+    parser.add_argument('--channel', type=str, default='mono', choices=['left', 'right', 'mono'], help='Channel to play the audio on')
 
     args = parser.parse_args()
-    play_audio(args.play_file, args.device, args.duration)
+    play_audio(args.play_file, args.device, args.duration, args.channel)
 
