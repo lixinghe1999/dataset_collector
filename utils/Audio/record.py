@@ -55,6 +55,7 @@ def receive_audio(dataset_folder, device, duration=5):
     filename = os.path.join(dataset_folder, f'{datetime_str}.wav')
     # Record the audio
     print('Recording audio start...')
+
     myrecording = sd.rec(int(duration * fs), samplerate=fs, channels=channels, dtype='int16')
     sd.wait()
     print('Recording audio done ...')
@@ -66,6 +67,55 @@ def receive_audio(dataset_folder, device, duration=5):
     waveFile.close()
     print(f'Audio saved at {filename} ...')
 
+import soundfile as sf
+import queue
+import sys
+
+# Queue to hold audio data
+audio_queue = queue.Queue()
+
+def callback(indata, frames, time, status):
+    """Callback function to process audio data."""
+    if status:
+        print(f"Stream status: {status}", file=sys.stderr)
+    audio_queue.put(indata.copy())
+
+def continuous_record(dataset_folder, device, ):
+    """Record audio continuously and save to a WAV file."""
+    # Audio recording parameters
+    BLOCKSIZE = 1024  # Number of frames per callback
+    DTYPE = 'float32'  # Data type for audio samples
+    try:
+        if isinstance(device, list):
+            idx, device_name = get_device_index_by_list(device)
+        else:
+            idx = device
+            device_name = sd.query_devices(idx)['name']
+        # Set the parameters
+        sd.default.device = idx
+        fs = sd.query_devices(sd.default.device[1])['default_samplerate']
+        channels = sd.query_devices(sd.default.device[1])['max_input_channels']
+        print(f'Using device index: {idx}, device name: {device_name}, fs: {fs}, channels: {channels}')
+
+        datetime_str = datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S-%f')
+        filename = os.path.join(dataset_folder, f'{datetime_str}.wav')
+        # Open a WAV file for writing
+        with sf.SoundFile(filename, mode='x', samplerate=int(fs), 
+                            channels=int(channels), subtype='PCM_16') as file:
+            # Start the audio stream
+            with sd.InputStream(samplerate=int(fs), channels=int(channels), 
+                                dtype=DTYPE, blocksize=BLOCKSIZE, 
+                                callback=callback):
+                print("Recording... Press Ctrl+C to stop.")
+                while True:
+                    # Write audio data from queue to file
+                    file.write(audio_queue.get())
+    except KeyboardInterrupt:
+        print("\nRecording stopped.")
+    except Exception as e:
+        print(f"An error occurred: {e}")
+        sys.exit(1)
+
 if __name__ == "__main__":
     import argparse
     parser = argparse.ArgumentParser(description='Record audio from a specified device.')
@@ -74,4 +124,8 @@ if __name__ == "__main__":
     parser.add_argument('--duration', type=int, default=5, help='Duration of the recording in seconds.')
 
     args = parser.parse_args()
-    receive_audio(args.dataset_folder, args.device, args.duration)
+    if args.duration <= 0:
+        print("Duration must be greater than 0. Recording continuously...")
+        continuous_record(args.dataset_folder, args.device)
+    else:
+        receive_audio(args.dataset_folder, args.device, args.duration)
